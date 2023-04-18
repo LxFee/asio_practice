@@ -11,6 +11,7 @@
 #include <cstdlib>
 #include <cstring>
 #include <string>
+#include <cstdio>
 #include <iostream>
 #include <memory>
 #include <algorithm>
@@ -114,7 +115,7 @@ private:
     });
     std::cout << "\033[2J\033[2H";
     std::cout << "ip: " << address_ << "\n"; 
-    std::cout << "range: " << eport_ - bport_ + 1 << "\n";
+    std::cout << "range: " << bport_ << "-" << eport_ << "(" << eport_ - bport_ + 1 << ")" << "\n";
     std::cout << "total: " << tcping::total << "\n";
     std::cout << "dead: " << tcping::dead << "\n";
     std::cout << "live: " << tcping::active << "\n"; 
@@ -156,8 +157,28 @@ int main(int argc, char* argv[])
     asio::io_context io_context;
     tcp::resolver resolver(io_context);
     auto result = resolver.resolve(argv[1], "0");
-    auto address = result.begin()->endpoint().address();
-
+    asio::ip::address address;
+    if(result.size() > 1) {
+      int items = 0;
+      for(auto it = result.begin(); it != result.end(); it++) {
+        std::cout << ++items << "\t" << it->endpoint().address() << "\n";
+      }
+      std::cout.flush();
+      int id;
+      while(1) {
+        std::cout << "choose [1-" << items << "]: ";
+        std::cin >> id;
+        if(id >= 1 && id <= items) break;
+      }
+      auto it = result.begin();
+      while(id - 1 > 0) {
+        it++;
+        id--;
+      }
+      address = it->endpoint().address();
+    } else {
+      address = result.begin()->endpoint().address();
+    }
     std::make_shared<tcping_helper>(io_context, address, bport, eport)->doit();
 
     io_context.run();
