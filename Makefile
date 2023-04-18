@@ -3,7 +3,7 @@
 CC = g++
 D_INC = include .
 D_BUILD = build
-CXXFLAGS = 
+CXXFLAGS = -std=c++17
 LIB = 
 
 ifeq ($(OS),Windows_NT)
