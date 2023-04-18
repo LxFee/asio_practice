@@ -54,7 +54,6 @@ public:
 private:
   friend class tcping_helper;
   static int64_t pings[1 << 16];
-  static int rank[1 << 16];
   static int active;
   static int dead;
   static int total;
@@ -69,7 +68,6 @@ private:
 };
 
 int64_t tcping::pings[1 << 16];
-int tcping::rank[1 << 16];
 int tcping::active;
 int tcping::dead;
 int tcping::total;
@@ -86,7 +84,6 @@ public:
 
       tcping::active = 0;
       memset(tcping::pings, -1, sizeof tcping::pings);
-      for(int i = 0; i < (1 << 16); i++) tcping::rank[i] = i;
     }
   
   void doit() {
@@ -108,11 +105,6 @@ public:
 
 private:
   void print() {
-    std::sort(tcping::rank, tcping::rank + (1 << 16), [](int p1, int p2){
-      if(tcping::pings[p1] < 0) return false;
-      if(tcping::pings[p2] < 0) return true;
-      return tcping::pings[p1] < tcping::pings[p2];
-    });
     std::cout << "\033[2J\033[2H";
     std::cout << "ip: " << address_ << "\n"; 
     std::cout << "range: " << bport_ << "-" << eport_ << "(" << eport_ - bport_ + 1 << ")" << "\n";
@@ -121,8 +113,8 @@ private:
     std::cout << "live: " << tcping::active << "\n"; 
 
     for(int i = 0; i < (1 << 16); i++) {
-      if(tcping::pings[tcping::rank[i]] < 0) continue;
-      std::cout << tcping::rank[i] << ": " << tcping::pings[tcping::rank[i]] << "ms\n";
+      if(tcping::pings[i] < 0) continue;
+      std::cout << i << "\t: " << tcping::pings[i] << "ms\n";
     }
     std::cout.flush();
   }
