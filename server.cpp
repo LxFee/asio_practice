@@ -66,7 +66,7 @@ class server
 {
 public:
   server(asio::io_context& io_context, short port)
-    : acceptor_(io_context, tcp::endpoint(tcp::v6(), port))
+    : acceptor_(io_context, tcp::endpoint(asio::ip::tcp::v4(), port))
   {
     do_accept();
   }
@@ -79,6 +79,7 @@ private:
         {
           if (!ec)
           {
+            std::cout << "Accept: " << socket.remote_endpoint() << std::endl;
             std::make_shared<session>(std::move(socket))->start();
           }
 
